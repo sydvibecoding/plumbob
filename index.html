@@ -211,7 +211,7 @@
       color: oklch(97% 0.01 148);
       font-family: 'DM Sans', sans-serif;
       font-size: 1rem;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 0.01em;
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -343,6 +343,55 @@
     }
     .newpath-btn:focus-visible { outline: 2px solid var(--ink-mid); outline-offset: 2px; }
 
+    /* ── Responsive ── */
+
+    /* Narrow phones (≤ 400px) */
+    @media (max-width: 400px) {
+      body { padding: 0 1rem 4rem; }
+
+      .cat-pill {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+      }
+
+      .result-actions {
+        flex-direction: column;
+      }
+
+      .newpath-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    /* Landscape mobile — shrink the header so content is reachable */
+    @media (max-height: 520px) and (orientation: landscape) {
+      .header {
+        padding-top: 1.25rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .plumbob-wrap { margin-bottom: 0.75rem; }
+
+      .plumbob {
+        width: 36px;
+        height: 46px;
+      }
+
+      h1 { font-size: clamp(2rem, 6vw, 3rem); }
+
+      .subtitle { margin-top: 0.4rem; }
+
+      .mode-section { margin-bottom: 1rem; }
+      .categories   { margin-bottom: 1rem; }
+      .generate-btn { margin-bottom: 1.5rem; }
+    }
+
+    /* Tablet and up — a touch more breathing room */
+    @media (min-width: 640px) {
+      body { padding: 0 2rem 6rem; }
+    }
+
     /* ── Reduced motion ── */
     @media (prefers-reduced-motion: reduce) {
       .plumbob.spin { animation: none; }
@@ -421,7 +470,7 @@
 
   </main>
 
-  <footer>Built for Sims 4 players who just need a sign.</footer>
+  <footer>Built for Sims 4 players who just need a sign. &mdash; <a href="https://github.com/sydvibecoding/plumbob" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;text-underline-offset:2px;">GitHub</a></footer>
 
   <script>
     const DATA = {
