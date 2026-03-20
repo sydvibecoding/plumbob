@@ -216,7 +216,7 @@
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
       box-shadow: 0 4px 22px var(--green-glow);
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
     }
 
     .generate-btn:hover {
@@ -243,6 +243,8 @@
                   transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
       pointer-events: none;
     }
+
+    .result[hidden] { display: none; }
 
     .result.visible {
       opacity: 1;
@@ -361,6 +363,36 @@
     }
     .newpath-btn:focus-visible { outline: 2px solid var(--ink-mid); outline-offset: 2px; }
 
+    /* ── Multi results ── */
+    .results-multi {
+      width: 100%;
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .results-multi[hidden] { display: none; }
+
+    .results-multi.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    #results-cards {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 2rem;
+    }
+
+    .result-item + .result-item {
+      margin-top: 2.5rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--cream-dark);
+    }
+
     /* ── Responsive ── */
 
     /* Narrow phones (≤ 400px) */
@@ -474,7 +506,7 @@
 
     <button class="generate-btn" id="generate-btn">Generate My Destiny</button>
 
-    <div class="result" id="result">
+    <div class="result" id="result" hidden>
       <p class="result-eyebrow"><i data-lucide="circle" class="icon" id="result-icon" aria-hidden="true"></i><span id="result-eyebrow"></span></p>
       <div class="result-rule"></div>
       <h2 class="result-path" id="result-path"></h2>
@@ -484,6 +516,14 @@
       <div class="result-actions">
         <button class="reroll-btn" id="reroll-btn"><i data-lucide="rotate-ccw" class="icon"></i> Reroll</button>
         <button class="newpath-btn" id="newpath-btn">Start over</button>
+      </div>
+    </div>
+
+    <div class="results-multi" id="results-multi" hidden>
+      <div id="results-cards"></div>
+      <div class="result-actions">
+        <button class="reroll-btn" id="reroll-multi-btn"><i data-lucide="rotate-ccw" class="icon"></i> Reroll All</button>
+        <button class="newpath-btn" id="newpath-multi-btn">Start over</button>
       </div>
     </div>
 
@@ -556,7 +596,7 @@
           { path: 'Manual Laborer',           direction: 'Backhoe Operator',        vibe: 'Honest work, honest pay. Your Sim shows up and gets it done.' },
           { path: 'Retail Employee',          direction: 'Customer Support',        vibe: 'The customer is always... present. Your Sim manages.' },
           { path: 'Diver',                    direction: 'Sunken Treasure Hunter',  vibe: "The ocean keeps its secrets close. Your Sim dives deeper." },
-          { path: 'Fisherman',               direction: 'Deep Sea Fishing Master',  vibe: "Patience is a practice. Your Sim perfected it at the water's edge.", wiki: W+'Part-time_job' },
+          { path: 'Fisherman',               direction: 'Deep Sea Fishing Master',  vibe: "Patience is a practice. Your Sim perfected it at the water's edge.", wiki: 'https://sims.fandom.com/wiki/Part-time_job' },
           { path: 'Lifeguard',                direction: 'Prolific Whistler',       vibe: 'Summer, sun, and the quiet authority of the tall chair. Your Sim watches everything.' },
           { path: 'Simfluencer',              direction: 'Mega-Simfluencer',        vibe: 'High school gig turned personal brand. Your Sim is building an audience one post at a time.' },
           { path: 'Video Game Streamer',      direction: 'Pro-Gamer',               vibe: 'The chat moves fast. Your Sim moves faster.' },
@@ -571,7 +611,7 @@
           { path: 'Freelance Writer',                direction: 'Words for Whoever',      vibe: 'Every brief is a new world. Your Sim writes them all.' },
           { path: 'Freelance Fashion Photographer',  direction: "Tomorrow's Style",       vibe: 'Fashion shoots, catalog gigs, the odd celebrity session. The lens is life.' },
           { path: 'Paranormal Investigator',         direction: 'Ghost Buster for Hire',  vibe: "Specters are out there, and they're kinda jerks. Your Sim is on it." },
-          { path: 'Fabricator',                      direction: 'Eco Artisan',            vibe: 'Made by hand, built to last. Your Sim fabricates the world they want to live in.', wiki: W+'Freelancer' },
+          { path: 'Fabricator',                      direction: 'Eco Artisan',            vibe: 'Made by hand, built to last. Your Sim fabricates the world they want to live in.', wiki: 'https://sims.fandom.com/wiki/Freelancer' },
           { path: 'Juice Fizzer',                    direction: 'Artisan Brewer',         vibe: 'Wild fermentation, neighborhood deliveries, and a very sticky workspace.' },
           { path: 'Candle Maker',                    direction: 'SIMply Crafted',         vibe: 'Slow mornings, fragrant afternoons. A life built from beeswax and intention.' },
         ]
@@ -744,9 +784,11 @@
     };
 
     // ── State ──
-    let selectedCategory = null;
-    let lastResult = null;
-    let guided = false;
+    const ALL_KEYS        = ['career_full', 'career_part', 'freelance', 'university', 'business', 'home'];
+    let selectedCategories = new Set();
+    let lastResult         = null;
+    let lastMultiResults   = null;
+    let guided             = false;
 
     // ── Elements ──
     const btnChaos  = document.getElementById('btn-chaos');
@@ -755,26 +797,38 @@
     const cats      = document.getElementById('categories');
     const genBtn    = document.getElementById('generate-btn');
     const result    = document.getElementById('result');
+    const multiEl   = document.getElementById('results-multi');
     const plumbob   = document.getElementById('plumbob');
+
+    // ── UI update ──
+    function updateUI() {
+      if (!guided) return;
+      const n = selectedCategories.size;
+      if (n === 0) {
+        hint.textContent   = 'Pick a category, or leave blank for a random one.';
+        genBtn.textContent = 'Generate My Destiny';
+      } else if (n === 1) {
+        const label = DATA[[...selectedCategories][0]].label;
+        hint.textContent   = `Rolling within ${label}.`;
+        genBtn.textContent = `Roll Within ${label}`;
+      } else {
+        hint.textContent   = `Rolling across ${n} categories.`;
+        genBtn.textContent = `Roll ${n} Destinies`;
+      }
+    }
 
     // ── Mode toggle ──
     function setMode(isGuided) {
       guided = isGuided;
       btnChaos.classList.toggle('active', !guided);
       btnGuided.classList.toggle('active', guided);
-
       if (guided) {
-        hint.textContent = selectedCategory
-          ? `Rolling within ${DATA[selectedCategory].label}.`
-          : 'Pick a category, or leave blank for a random one.';
         cats.classList.remove('hidden');
-        genBtn.textContent = selectedCategory
-          ? `Roll Within ${DATA[selectedCategory].label}`
-          : 'Generate My Destiny';
+        updateUI();
       } else {
         hint.textContent = 'Fully random — the cosmos decides everything.';
         cats.classList.add('hidden');
-        selectedCategory = null;
+        selectedCategories.clear();
         document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
         genBtn.textContent = 'Generate My Destiny';
       }
@@ -786,19 +840,18 @@
     // ── Init icons ──
     lucide.createIcons();
 
-    // ── Category pills ──
+    // ── Category pills — multi-select ──
     document.querySelectorAll('.cat-pill').forEach(pill => {
       pill.addEventListener('click', () => {
         const key = pill.dataset.key;
-        if (selectedCategory === key) {
-          selectedCategory = null;
+        if (selectedCategories.has(key)) {
+          selectedCategories.delete(key);
           pill.classList.remove('selected');
         } else {
-          selectedCategory = key;
-          document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
+          selectedCategories.add(key);
           pill.classList.add('selected');
         }
-        updateSlider();
+        updateUI();
       });
     });
 
@@ -807,24 +860,31 @@
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
-    function generate(forcePool) {
-      let pool;
-      if (forcePool) {
-        pool = forcePool;
-      } else if (selectedCategory) {
-        pool = DATA[selectedCategory].entries.map(e => ({
-          ...e, category: DATA[selectedCategory].label, iconName: DATA[selectedCategory].iconName
-        }));
-      } else {
-        pool = Object.values(DATA).flatMap(cat =>
-          cat.entries.map(e => ({ ...e, category: cat.label, iconName: cat.iconName }))
-        );
-      }
-      return pick(pool);
+    function buildPool(keys) {
+      return keys.flatMap(key =>
+        DATA[key].entries.map(e => ({ ...e, category: DATA[key].label, iconName: DATA[key].iconName }))
+      );
     }
 
+    function generate(forcePool) {
+      if (forcePool) return pick(forcePool);
+      const keys = selectedCategories.size > 0 ? [...selectedCategories] : ALL_KEYS;
+      return pick(buildPool(keys));
+    }
+
+    function generateForSelection() {
+      return [...selectedCategories].map(key => {
+        const cat   = DATA[key];
+        const entry = pick(cat.entries);
+        return { ...entry, category: cat.label, iconName: cat.iconName };
+      });
+    }
+
+    // ── Show results ──
     function showResult(entry) {
-      lastResult = entry;
+      lastResult       = entry;
+      lastMultiResults = null;
+
       const iconEl = document.getElementById('result-icon');
       iconEl.setAttribute('data-lucide', entry.iconName);
       lucide.createIcons({ nodes: [iconEl] });
@@ -838,40 +898,87 @@
       if (wikiUrl) { wikiEl.href = wikiUrl; wikiEl.hidden = false; }
       else          { wikiEl.hidden = true; }
 
+      multiEl.classList.remove('visible');
+      multiEl.hidden = true;
       result.classList.remove('visible');
-      requestAnimationFrame(() => requestAnimationFrame(() => result.classList.add('visible')));
+      result.hidden = false;
+      void result.offsetHeight;
+      requestAnimationFrame(() => result.classList.add('visible'));
     }
 
-    function spinAndGenerate(pool) {
+    function showMultiResults(entries) {
+      lastMultiResults = entries;
+      lastResult       = null;
+      result.classList.remove('visible');
+
+      const cardsEl = document.getElementById('results-cards');
+      cardsEl.innerHTML = '';
+      entries.forEach(entry => {
+        const wikiUrl = entry.wiki || WIKI_MAP[entry.path];
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        item.innerHTML =
+          `<p class="result-eyebrow"><i data-lucide="${entry.iconName}" class="icon" aria-hidden="true"></i><span>${entry.category}</span></p>` +
+          `<div class="result-rule"></div>` +
+          `<h2 class="result-path">${entry.path}</h2>` +
+          `<p class="result-direction">${entry.direction}</p>` +
+          (wikiUrl ? `<a class="result-wiki" href="${wikiUrl}" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link" class="icon"></i> Sims Wiki</a>` : '') +
+          `<blockquote class="result-vibe">${entry.vibe}</blockquote>`;
+        cardsEl.appendChild(item);
+      });
+
+      lucide.createIcons({ nodes: [...cardsEl.querySelectorAll('[data-lucide]')] });
+
+      multiEl.hidden = false;
+      void multiEl.offsetHeight;
+      multiEl.classList.add('visible');
+    }
+
+    // ── Spin helpers ──
+    function spin(cb) {
       plumbob.classList.remove('spin');
       requestAnimationFrame(() => {
         plumbob.classList.add('spin');
         plumbob.addEventListener('animationend', () => plumbob.classList.remove('spin'), { once: true });
       });
-      showResult(generate(pool));
+      cb();
     }
 
-    genBtn.addEventListener('click', () => spinAndGenerate(null));
+    function spinAndGenerate(pool) { spin(() => showResult(generate(pool))); }
+    function spinAndShowMulti()    { spin(() => showMultiResults(generateForSelection())); }
+
+    // ── Events ──
+    genBtn.addEventListener('click', () => {
+      if (guided && selectedCategories.size > 0) spinAndShowMulti();
+      else spinAndGenerate(null);
+    });
 
     document.getElementById('reroll-btn').addEventListener('click', () => {
-      // Reroll within same category
       const pool = lastResult
         ? Object.values(DATA).flatMap(cat =>
             cat.entries
-              .filter(e => e.path === lastResult.path || cat.label === lastResult.category)
+              .filter(e => cat.label === lastResult.category)
               .map(e => ({ ...e, category: cat.label, iconName: cat.iconName }))
           )
         : null;
       spinAndGenerate(pool?.length ? pool : null);
     });
 
-    document.getElementById('newpath-btn').addEventListener('click', () => {
+    document.getElementById('reroll-multi-btn').addEventListener('click', () => spinAndShowMulti());
+
+    function startOver() {
       result.classList.remove('visible');
-      selectedCategory = null;
+      result.hidden = true;
+      multiEl.classList.remove('visible');
+      multiEl.hidden = true;
+      selectedCategories.clear();
       document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
       setMode(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    }
+
+    document.getElementById('newpath-btn').addEventListener('click', startOver);
+    document.getElementById('newpath-multi-btn').addEventListener('click', startOver);
 
     // init
     setMode(false);
