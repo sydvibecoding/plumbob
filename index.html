@@ -302,23 +302,6 @@
       margin-bottom: 0.5rem;
     }
 
-    .result-wiki {
-      display: block;
-      width: fit-content;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      color: var(--green-ink);
-      text-decoration: none;
-      margin-bottom: 1.4rem;
-    }
-
-    .result-wiki:hover {
-      opacity: 1;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
     .result-vibe {
       font-family: 'Fraunces', Georgia, serif;
       font-style: italic;
@@ -536,8 +519,7 @@
       <div class="result-rule"></div>
       <h2 class="result-path" id="result-path" tabindex="-1"></h2>
       <p class="result-direction" id="result-direction"></p>
-      <a class="result-wiki" id="result-wiki" target="_blank" rel="noopener noreferrer" hidden><i data-lucide="external-link" class="icon"></i> Sims Wiki</a>
-      <p class="result-vibe" id="result-vibe"></p>
+<p class="result-vibe" id="result-vibe"></p>
       <div class="result-actions">
         <button class="reroll-btn" id="reroll-btn"><i data-lucide="rotate-ccw" class="icon"></i> Reroll</button>
         <button class="newpath-btn" id="newpath-btn">Start over</button>
@@ -642,7 +624,7 @@
           { path: 'Manual Laborer',           direction: 'Backhoe Operator',        vibe: 'Honest work, honest pay. Your Sim shows up and gets it done.' },
           { path: 'Retail Employee',          direction: 'Customer Support',        vibe: 'The customer is always... present. Your Sim manages.' },
           { path: 'Diver',                    direction: 'Sunken Treasure Hunter',  vibe: "The ocean keeps its secrets close. Your Sim dives deeper." },
-          { path: 'Fisherman',               direction: 'Deep Sea Fishing Master',  vibe: "Patience is a practice. Your Sim perfected it at the water's edge.", wiki: 'https://sims.fandom.com/wiki/Part-time_job' },
+          { path: 'Fisherman',               direction: 'Deep Sea Fishing Master',  vibe: "Patience is a practice. Your Sim perfected it at the water's edge." },
           { path: 'Lifeguard',                direction: 'Prolific Whistler',       vibe: 'Summer, sun, and the quiet authority of the tall chair. Your Sim watches everything.' },
           { path: 'Simfluencer',              direction: 'Mega-Simfluencer',        vibe: 'High school gig turned personal brand. Your Sim is building an audience one post at a time.' },
           { path: 'Video Game Streamer',      direction: 'Pro-Gamer',               vibe: 'The chat moves fast. Your Sim moves faster.' },
@@ -657,7 +639,7 @@
           { path: 'Freelance Writer',                direction: 'Words for Whoever',      vibe: 'Every brief is a new world. Your Sim writes them all.' },
           { path: 'Freelance Fashion Photographer',  direction: "Tomorrow's Style",       vibe: 'Fashion shoots, catalog gigs, the odd celebrity session. The lens is life.' },
           { path: 'Paranormal Investigator',         direction: 'Ghost Buster for Hire',  vibe: "Specters are out there, and they're kinda jerks. Your Sim is on it." },
-          { path: 'Fabricator',                      direction: 'Eco Artisan',            vibe: 'Made by hand, built to last. Your Sim fabricates the world they want to live in.', wiki: 'https://sims.fandom.com/wiki/Freelancer' },
+          { path: 'Fabricator',                      direction: 'Eco Artisan',            vibe: 'Made by hand, built to last. Your Sim fabricates the world they want to live in.' },
           { path: 'Juice Fizzer',                    direction: 'Artisan Brewer',         vibe: 'Wild fermentation, neighborhood deliveries, and a very sticky workspace.' },
           { path: 'Candle Maker',                    direction: 'SIMply Crafted',         vibe: 'Slow mornings, fragrant afternoons. A life built from beeswax and intention.' },
         ]
@@ -748,115 +730,6 @@
           { path: 'Homesteader',             direction: 'Animals, Garden & Table',  vibe: 'Self-sufficient and proud of it. Your Sim grows it, raises it, makes it, eats it.' },
         ]
       }
-    };
-
-    // ── Wiki links ──
-    const W = 'https://sims.fandom.com/wiki/';
-    const WIKI_MAP = {
-      // Full-time careers
-      'Astronaut':        W+'Astronaut',
-      'Athlete':          W+'Athletic_(career)',
-      'Business':         W+'Business_(career)',
-      'Criminal':         W+'Criminal',
-      'Culinary':         W+'Culinary',
-      'Entertainer':      W+'Entertainment',
-      'Painter':          W+'Painter',
-      'Secret Agent':     W+'Secret_agent',
-      'Tech Guru':        W+'Tech_guru',
-      'Writer':           W+'Writer',
-      'Doctor':           W+'Medicine',
-      'Detective':        W+'Law_enforcement',
-      'Scientist':        W+'Scientist',
-      'Critic':           W+'Critic',
-      'Politician':       W+'Politics',
-      'Social Media':     W+'Social_media',
-      'Actor':            W+'Actor_(career)',
-      'Education':        W+'Education_(career)',
-      'Engineer':         W+'Engineer_(career)',
-      'Law':              W+'Law_(career)',
-      'Civil Designer':   W+'Civil_designer_(career)',
-      'Salaryperson':     W+'Salaryperson',
-      'Style Influencer': W+'Style_influencer_(career)',
-      // Part-time jobs (path-specific entries override below for conflicts)
-      'Babysitter':          W+'Part-time_job',
-      'Barista':             W+'Part-time_job',
-      'Fast Food Employee':  W+'Part-time_job',
-      'Manual Laborer':      W+'Part-time_job',
-      'Retail Employee':     W+'Part-time_job',
-      'Diver':               W+'Part-time_job',
-      'Lifeguard':           W+'Part-time_job',
-      'Simfluencer':         W+'Part-time_job',
-      'Video Game Streamer': W+'Part-time_job',
-      'Handyperson':         W+'Part-time_job',
-      // Freelancers
-      'Freelance Programmer':           W+'Freelancer',
-      'Freelance Artist':               W+'Freelancer',
-      'Freelance Writer':               W+'Freelancer',
-      'Freelance Fashion Photographer': W+'Freelancer',
-      'Paranormal Investigator':        W+'Freelancer',
-      'Juice Fizzer':                   W+'Freelancer',
-      'Candle Maker':                   W+'Freelancer',
-      // University
-      'Language & Literature': W+'University_(The_Sims_4)',
-      'Fine Arts':             W+'University_(The_Sims_4)',
-      'History':               W+'University_(The_Sims_4)',
-      'Psychology':            W+'University_(The_Sims_4)',
-      'Biology':               W+'University_(The_Sims_4)',
-      'Physics':               W+'University_(The_Sims_4)',
-      'Computer Science':      W+'University_(The_Sims_4)',
-      'Economics':             W+'University_(The_Sims_4)',
-      'Communications':        W+'University_(The_Sims_4)',
-      'Culinary Arts':         W+'University_(The_Sims_4)',
-      'Drama':                 W+'University_(The_Sims_4)',
-      'Villainy':              W+'University_(The_Sims_4)',
-      // New careers
-      'Military':            W+'Military_(career)',
-      'Conservationist':     W+'Conservationist',
-      'Romance Consultant':  W+'Romance_consultant',
-      'Naturopath':          W+'Naturopath',
-      'Reaper':              W+'Reaper_(career)',
-      'Undertaker':          W+'Undertaker',
-      'Noble':               W+'Noble',
-      // Business — retail
-      'Clothing Boutique': W+'Retail_(The_Sims_4)',
-      'Bakery':            W+'Retail_(The_Sims_4)',
-      'Electronics Store': W+'Retail_(The_Sims_4)',
-      'Antique Shop':      W+'Retail_(The_Sims_4)',
-      'Book Shop':         W+'Retail_(The_Sims_4)',
-      // Business — restaurant
-      'Fine Dining Restaurant': W+'Restaurant_(The_Sims_4)',
-      'Casual Restaurant':      W+'Restaurant_(The_Sims_4)',
-      // Business — other
-      'Vet Clinic':        W+'Vet_clinic',
-      'Rental Properties': W+'Rental_property',
-      // Small businesses
-      'Coffee Shop':            W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Bar & Lounge':           W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Pottery Studio':         W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Tattoo Parlor':          W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Yoga & Wellness Studio': W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Art Gallery':            W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Comedy Club':            W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Music Venue':            W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Gaming Arcade':          W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Flower Shop':            W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Craft Workshop':         W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Photography Studio':     W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Fitness Studio':         W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Apothecary':             W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Tutoring Center':        W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Spa':                    W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Paranormal Agency':      W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Library':                W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Museum':                 W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Nightclub':              W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Park':                   W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Aquatic Center':         W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Karaoke Bar':            W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Bowling Alley':          W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Dance Studio':           W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Pet Café':               W+'The_Sims_4:_Businesses_%26_Hobbies',
-      'Daycare':                W+'The_Sims_4:_Businesses_%26_Hobbies',
     };
 
     // ── State ──
@@ -973,16 +846,6 @@
       document.getElementById('result-direction').textContent = entry.direction;
       document.getElementById('result-vibe').textContent      = entry.vibe;
 
-      const wikiUrl = entry.wiki || WIKI_MAP[entry.path];
-      const wikiEl  = document.getElementById('result-wiki');
-      if (wikiUrl) {
-        wikiEl.href = wikiUrl;
-        wikiEl.setAttribute('aria-label', `View ${entry.path} on Sims Wiki`);
-        wikiEl.hidden = false;
-      } else {
-        wikiEl.hidden = true;
-      }
-
       multiEl.classList.remove('visible');
       multiEl.hidden = true;
       result.classList.remove('visible');
@@ -1005,7 +868,6 @@
       const cardsEl = document.getElementById('results-cards');
       cardsEl.innerHTML = '';
       entries.forEach(entry => {
-        const wikiUrl = entry.wiki || WIKI_MAP[entry.path];
         const item = document.createElement('div');
         item.className = 'result-item';
         item.innerHTML =
@@ -1013,7 +875,6 @@
           `<div class="result-rule"></div>` +
           `<h2 class="result-path">${entry.path}</h2>` +
           `<p class="result-direction">${entry.direction}</p>` +
-          (wikiUrl ? `<a class="result-wiki" href="${wikiUrl}" target="_blank" rel="noopener noreferrer" aria-label="View ${entry.path} on Sims Wiki"><i data-lucide="external-link" class="icon"></i> Sims Wiki</a>` : '') +
           `<p class="result-vibe">${entry.vibe}</p>`;
         cardsEl.appendChild(item);
       });
